@@ -10,7 +10,7 @@ const router = useRouter()
 const { user, signOut } = useAuth()
 
 // 認証ガードを通過しているので user は必ず存在する
-const { todos, loading, errorMessage, fetchTodos, addTodo, toggleTodo, removeTodo } =
+const { todos, loading, errorMessage, fetchTodos, addTodo, toggleTodo, removeTodo, attachImage, getImageUrl } =
   useTodos(user.value!.id)
 
 onMounted(fetchTodos)
@@ -39,7 +39,7 @@ async function handleLogout() {
       <TodoInput @add="addTodo" />
       <p v-if="errorMessage" class="text-sm text-red-600 mb-3">{{ errorMessage }}</p>
       <p v-if="loading" class="text-center text-gray-400 py-10">読み込み中...</p>
-      <TodoList v-else :todos="todos" @toggle="toggleTodo" @remove="removeTodo" />
+      <TodoList v-else :todos="todos" :get-image-url="getImageUrl" @toggle="toggleTodo" @remove="removeTodo" @attach="attachImage" />
     </main>
   </div>
 </template>
