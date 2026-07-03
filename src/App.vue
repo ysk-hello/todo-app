@@ -1,9 +1,11 @@
-<script setup lang="ts"></script>
+<script setup lang="ts">
+import { onMounted } from 'vue'
+import { useAuth } from './composables/useAuth'
+
+const { initialize } = useAuth()
+onMounted(initialize)
+</script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gray-50">
-    <h1 class="text-3xl font-bold text-blue-600">環境構築できました</h1>
-  </div>
+  <RouterView />
 </template>
-
-<style scoped></style>

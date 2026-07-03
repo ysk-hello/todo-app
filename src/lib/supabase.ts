@@ -10,4 +10,6 @@ if (!supabaseUrl || !supabaseAnonKey) {
 }
 
 // アプリ全体で共有する Supabase クライアント
-export const supabase = createClient(supabaseUrl, supabaseAnonKey)
+export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
+  auth: { flowType: 'pkce' },
+})
