@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted } from 'vue'
+import { onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
 import { useTodos } from '../composables/useTodos'
@@ -10,10 +10,17 @@ const router = useRouter()
 const { user, signOut } = useAuth()
 
 // 認証ガードを通過しているので user は必ず存在する
-const { todos, loading, errorMessage, fetchTodos, addTodo, toggleTodo, removeTodo, attachImage, getImageUrl } =
+const { todos, loading, errorMessage, fetchTodos, addTodo, toggleTodo, removeTodo, attachImage, getImageUrl, subscribeRealtime, unsubscribeRealtime } =
   useTodos(user.value!.id)
 
-onMounted(fetchTodos)
+onMounted(async () => {
+  await fetchTodos()
+  subscribeRealtime() // 表示時に購読開始
+})
+
+onUnmounted(() => {
+  unsubscribeRealtime() // 離脱時に購読解除
+})
 
 async function handleLogout() {
   await signOut()

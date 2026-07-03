@@ -1,5 +1,5 @@
 import { ref } from 'vue'
-import type { RealtimeChannel } from '@supabase/supabase-js' // 次章で使用
+import type { RealtimeChannel } from '@supabase/supabase-js'
 import { supabase } from '../lib/supabase'
 import type { Todo } from '../types/todo'
 
@@ -11,6 +11,7 @@ export function useTodos(userId: string) {
   const todos = ref<Todo[]>([])
   const loading = ref(false)
   const errorMessage = ref<string | null>(null)
+  let channel: RealtimeChannel | null = null
 
   // Read：一覧取得
   async function fetchTodos() {
@@ -84,6 +85,32 @@ export function useTodos(userId: string) {
     return data.signedUrl
   }
 
+  // Realtime：自分の todos の変更を購読し、変化があれば再取得する
+  function subscribeRealtime() {
+    channel = supabase
+      .channel('todos-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*', // INSERT / UPDATE / DELETE すべて
+          schema: 'public',
+          table: 'todos',
+          filter: `user_id=eq.${userId}`, // 自分の行の変更だけ
+        },
+        () => {
+          fetchTodos() // 変更を検知したら一覧を再取得
+        }
+      )
+      .subscribe()
+  }
+
+  function unsubscribeRealtime() {
+    if (channel) {
+      supabase.removeChannel(channel)
+      channel = null
+    }
+  }
+
   return {
     todos,
     loading,
@@ -94,5 +121,7 @@ export function useTodos(userId: string) {
     removeTodo,
     attachImage,
     getImageUrl,
+    subscribeRealtime,
+    unsubscribeRealtime,
   }
 }
